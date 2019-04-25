@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	// "github.com/davecgh/go-spew/spew"
 	"html/template"
 	"net/http"
@@ -19,7 +20,9 @@ var errorTemplate = `
 `
 
 type data struct {
-	Active string
+	Active  string
+	Bucket  string
+	Backend string
 }
 
 func main() {
@@ -27,6 +30,18 @@ func main() {
 
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		renderTemplate(w, r, "index/home", data{Active: "home"})
+	})
+
+	mux.HandleFunc("/images", func(w http.ResponseWriter, r *http.Request) {
+		// load bucket url from env
+		imagesURL := "http://" + os.Getenv("BUCKET")
+		renderTemplate(w, r,
+			"index/images",
+			data{
+				Active: "images",
+				Bucket: imagesURL,
+			},
+		)
 	})
 
 	http.ListenAndServe(":3000", mux)
